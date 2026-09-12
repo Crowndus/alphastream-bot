@@ -17,9 +17,14 @@ export const STAGING_DOMAINS = {
 } as const;
 
 // WebSocket server URLs
+// Alphastream: append app_id — Deriv's WebSocket servers require this on
+// every connection; without it the handshake is rejected/hangs, which was
+// causing the app to be stuck forever on "Initializing Deriv Bot account...".
+// Falls back to Deriv's public demo app_id (1089) if APP_ID isn't set.
+const APP_ID_PARAM = `app_id=${process.env.APP_ID || '1089'}`;
 export const WS_SERVERS = {
-    STAGING: `${brandConfig.platform.derivws.url.staging}options/ws/public`,
-    PRODUCTION: `${brandConfig.platform.derivws.url.production}options/ws/public`,
+    STAGING: `${brandConfig.platform.derivws.url.staging}options/ws/public?${APP_ID_PARAM}`,
+    PRODUCTION: `${brandConfig.platform.derivws.url.production}options/ws/public?${APP_ID_PARAM}`,
 } as const;
 
 // =============================================================================
