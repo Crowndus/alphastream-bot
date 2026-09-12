@@ -31,6 +31,7 @@ export default defineConfig({
                 APP_ID: JSON.stringify(process.env.APP_ID),
                 AFFILIATE_TOKEN: JSON.stringify(process.env.AFFILIATE_TOKEN),
                 UTM_CAMPAIGN: JSON.stringify(process.env.UTM_CAMPAIGN),
+                TRADER_URL: JSON.stringify(process.env.TRADER_URL),
                 GD_CLIENT_ID: JSON.stringify(process.env.GD_CLIENT_ID),
                 GD_APP_ID: JSON.stringify(process.env.GD_APP_ID),
                 GD_API_KEY: JSON.stringify(process.env.GD_API_KEY),
