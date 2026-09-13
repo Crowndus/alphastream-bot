@@ -17,14 +17,17 @@ export const STAGING_DOMAINS = {
 } as const;
 
 // WebSocket server URLs
-// Alphastream: append app_id — Deriv's WebSocket servers require this on
-// every connection; without it the handshake is rejected/hangs, which was
-// causing the app to be stuck forever on "Initializing Deriv Bot account...".
-// Falls back to Deriv's public demo app_id (1089) if APP_ID isn't set.
+// Alphastream: use Deriv's actual public WebSocket endpoint
+// (wss://ws.derivws.com/websockets/v3) — the previous value here
+// (a fabricated https://.../trading/v1/options/ws/public path) was wrong
+// on two counts: wrong protocol (https instead of wss, which browsers
+// reject outright for a WebSocket connection) and a URL structure that
+// doesn't correspond to any real Deriv endpoint. This is what was causing
+// the app to hang forever on "Initializing Deriv Bot account...".
 const APP_ID_PARAM = `app_id=${process.env.APP_ID || '1089'}`;
 export const WS_SERVERS = {
-    STAGING: `${brandConfig.platform.derivws.url.staging}options/ws/public?${APP_ID_PARAM}`,
-    PRODUCTION: `${brandConfig.platform.derivws.url.production}options/ws/public?${APP_ID_PARAM}`,
+    STAGING: `wss://ws.derivws.com/websockets/v3?${APP_ID_PARAM}`,
+    PRODUCTION: `wss://ws.derivws.com/websockets/v3?${APP_ID_PARAM}`,
 } as const;
 
 // =============================================================================
