@@ -35,11 +35,29 @@ export const WS_SERVERS = {
 // =============================================================================
 
 // Helper to check if we're on production domains
+// Alphastream: any unrecognized public host (e.g. a Vercel testing URL)
+// now defaults to production Deriv endpoints instead of staging — Deriv's
+// staging endpoints are internal-only and never respond publicly.
 export const isProduction = () => {
     const hostname = window.location.hostname;
     const productionDomains = Object.values(PRODUCTION_DOMAINS) as string[];
-    return productionDomains.includes(hostname);
+    if (productionDomains.includes(hostname)) return true;
+    if (/^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(hostname) || hostname.endsWith('.local')) return false;
+    const stagingDomains = Object.values(STAGING_DOMAINS) as string[];
+    if (stagingDomains.includes(hostname) || /staging/i.test(hostname)) return false;
+    return true;
 };
+
+// Auth values: environment variables win, brand.config.json is the fallback
+// so a deployment without env vars still works instead of silently doing
+// nothing (this was the actual cause of the Sign Up button doing nothing).
+type BrandAuth = { client_id?: string; app_id?: string; affiliate_token?: string; utm_campaign?: string };
+const brandAuth = ((brandConfig as unknown as { auth?: BrandAuth }).auth ?? {}) as BrandAuth;
+
+export const getOAuthClientId = () => process.env.CLIENT_ID || brandAuth.client_id || '';
+export const getLegacyAppId = () => process.env.APP_ID || brandAuth.app_id || '';
+export const getAffiliateToken = () => process.env.AFFILIATE_TOKEN || brandAuth.affiliate_token || '';
+export const getUtmCampaign = () => process.env.UTM_CAMPAIGN || brandAuth.utm_campaign || '';
 
 export const isLocal = () => /localhost(:\d+)?$/i.test(window.location.hostname);
 
@@ -233,7 +251,7 @@ export const generateOAuthURL = async (prompt?: string) => {
         // Use brand config for login URLs
         const environment = isProduction() ? 'production' : 'staging';
         const hostname = brandConfig?.platform.auth2_url?.[environment];
-        const clientId = process.env.CLIENT_ID;
+        const clientId = getOAuthClientId();
 
         if (hostname && clientId) {
             // Generate CSRF token for security
@@ -267,18 +285,17 @@ export const generateOAuthURL = async (prompt?: string) => {
             }
 
             // Optional: legacy app_id for routing users on the Legacy Deriv API platform
-            const appId = process.env.APP_ID;
+            const appId = getLegacyAppId();
             if (appId) {
                 oauthUrl += `&app_id=${encodeURIComponent(appId)}`;
             }
 
             // Alphastream: affiliate tagging so trades are attributed to our partner account.
-            // See build plan Phase 3.3 — extracted from the referral link's sidc/utm_campaign params.
-            const affiliateToken = process.env.AFFILIATE_TOKEN;
+            const affiliateToken = getAffiliateToken();
             if (affiliateToken) {
                 oauthUrl += `&affiliate_token=${encodeURIComponent(affiliateToken)}`;
             }
-            const utmCampaign = process.env.UTM_CAMPAIGN;
+            const utmCampaign = getUtmCampaign();
             if (utmCampaign) {
                 oauthUrl += `&utm_campaign=${encodeURIComponent(utmCampaign)}`;
             }

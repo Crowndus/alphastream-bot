@@ -93,5 +93,10 @@
                 "derivatives": "derivatives/"
             }
         }
+    },
+    "auth": {
+        "client_id": "34lQnx9EGfoO2spCtg6GH",
+        "affiliate_token": "3WMT9P3QCUM7",
+        "utm_campaign": ""
     }
 }
