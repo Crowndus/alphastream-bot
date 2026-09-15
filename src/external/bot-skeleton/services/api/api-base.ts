@@ -190,7 +190,34 @@ class APIBase {
         const hasAccountID = V2GetActiveAccountId();
 
         if (!this.has_active_symbols && !hasAccountID) {
-            this.active_symbols_promise = this.getActiveSymbols().then(() => undefined);
+            // Alphastream: wait for the socket to actually be OPEN before
+            // requesting active symbols. generateDerivApiInstance() returns
+            // the API wrapper immediately without waiting for the real
+            // WebSocket handshake to finish (by design, for fast UI
+            // startup), so sending a request right away could race ahead of
+            // the connection actually being ready — resulting in an empty
+            // active_symbols response with no error, which then threw an
+            // uncaught rejection and left the app stuck on "Initializing
+            // Deriv Bot account..." forever.
+            const waitForOpen = (): Promise<void> => {
+                if (this.api?.connection?.readyState === 1) return Promise.resolve();
+                return new Promise(resolve => {
+                    const handleOpen = () => {
+                        this.api?.connection?.removeEventListener('open', handleOpen);
+                        resolve();
+                    };
+                    this.api?.connection?.addEventListener('open', handleOpen);
+                });
+            };
+
+            this.active_symbols_promise = waitForOpen()
+                .then(() => this.getActiveSymbols())
+                .then(() => undefined)
+                .catch(err => {
+                    // eslint-disable-next-line no-console
+                    console.error('[DerivAPI] Failed to load active symbols:', err);
+                    return undefined;
+                });
         }
 
         this.initEventListeners();
