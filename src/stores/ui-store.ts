@@ -6,7 +6,9 @@ export default class UiStore {
     is_desktop = true;
     is_tablet = false;
     is_chart_layout_default = true;
-    is_dark_mode_on = localStorage.getItem('theme') === 'dark';
+    // Alphastream: default to dark mode (matching the landing page, which
+    // is dark-only) unless the user has explicitly chosen light before.
+    is_dark_mode_on = localStorage.getItem('theme') !== 'light';
     account_switcher_disabled_message = '';
     current_focus = null;
     show_prompt = false;
