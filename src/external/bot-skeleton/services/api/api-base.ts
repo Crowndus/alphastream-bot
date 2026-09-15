@@ -198,7 +198,7 @@ class APIBase {
             // the connection actually being ready — resulting in an empty
             // active_symbols response with no error, which then threw an
             // uncaught rejection and left the app stuck on "Initializing
-            // Deriv Bot account..." forever.
+            // Alphastream Bot account..." forever.
             const waitForOpen = (): Promise<void> => {
                 if (this.api?.connection?.readyState === 1) return Promise.resolve();
                 return new Promise(resolve => {

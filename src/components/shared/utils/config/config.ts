@@ -23,7 +23,7 @@ export const STAGING_DOMAINS = {
 // on two counts: wrong protocol (https instead of wss, which browsers
 // reject outright for a WebSocket connection) and a URL structure that
 // doesn't correspond to any real Deriv endpoint. This is what was causing
-// the app to hang forever on "Initializing Deriv Bot account...".
+// the app to hang forever on "Initializing Alphastream Bot account...".
 const APP_ID_PARAM = `app_id=${process.env.APP_ID || '1089'}`;
 export const WS_SERVERS = {
     STAGING: `wss://ws.derivws.com/websockets/v3?${APP_ID_PARAM}`,
